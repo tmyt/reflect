@@ -1,12 +1,33 @@
-package net.refy.android.reflect
+package tech.onsen.reflect
 
+import java.lang.IllegalStateException
 import java.lang.reflect.Constructor
 import java.lang.reflect.Method
 import kotlin.reflect.KProperty
 
-abstract class Reflect {
-    abstract val type: Class<*>
-    open val value: Any? = null
+abstract class Reflect() {
+    private lateinit var _clazz: Class<*>
+
+    constructor(className: String) : this() {
+        _clazz = Class.forName(className)
+    }
+
+    constructor(clazz: Class<*>): this(){
+        _clazz = clazz
+    }
+
+    protected open val type: Class<*> by lazy {
+        if (!::_clazz.isInitialized) throw IllegalStateException("target class must initialized")
+        else _clazz
+    }
+
+    protected open val value: Any? by lazy {
+        try {
+            type.getConstructor().newInstance()
+        }catch(e: NoSuchMethodException){
+            throw IllegalStateException("target have no default constructor")
+        }
+    }
 
     class MethodDelegate<T>(private val isStatic: Boolean, private vararg val args: Class<*>) {
         private lateinit var method: MethodRef<T>
