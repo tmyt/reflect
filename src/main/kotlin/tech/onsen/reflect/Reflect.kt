@@ -32,10 +32,10 @@ abstract class Reflect() {
     class MethodDelegate<T>(private val isStatic: Boolean, private vararg val args: Class<*>) {
         private lateinit var method: MethodRef<T>
 
-        operator fun getValue(thisRef: Reflect?, property: KProperty<*>): MethodRef<T> {
+        operator fun getValue(thisRef: Reflect, property: KProperty<*>): MethodRef<T> {
             if (!::method.isInitialized) {
                 method = MethodRef(
-                    thisRef!!,
+                    if(isStatic) null else thisRef,
                     thisRef.type.getMethod(property.name, *args)
                 )
             }
