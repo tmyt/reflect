@@ -30,25 +30,38 @@ abstract class Reflect() {
     }
 
     class MethodDelegate<T>(private val isStatic: Boolean, private vararg val args: Class<*>) {
-        private lateinit var method: MethodRef<T>
+        class Ref<T>(private val thisRef: Reflect?, private val methodRef: Method?) {
+            val available: Boolean = methodRef != null
 
-        operator fun getValue(thisRef: Reflect, property: KProperty<*>): MethodRef<T> {
+            @Suppress("UNCHECKED_CAST")
+            operator fun invoke(vararg args: Any?): T {
+                if(!available)throw Exception()
+                return methodRef!!.invoke(thisRef?.value, *args) as T
+            }
+        }
+
+        private lateinit var method: Ref<T>
+
+        private fun getMethod(type: Class<*>, name: String): Method? {
+            return try {
+                type.getMethod(name, *args)
+            }catch (e: NoSuchMethodException){
+                null
+            }
+        }
+
+        operator fun getValue(thisRef: Reflect, property: KProperty<*>): Ref<T> {
             if (!::method.isInitialized) {
-                method = MethodRef(
+                method = Ref(
                     if(isStatic) null else thisRef,
-                    thisRef.type.getMethod(property.name, *args)
+                    getMethod(thisRef.type, property.name)
                 )
             }
             return method
         }
     }
 
-    class MethodRef<T>(private val thisRef: Reflect?, private val methodRef: Method) {
-        @Suppress("UNCHECKED_CAST")
-        operator fun invoke(vararg args: Any?): T {
-            return methodRef.invoke(thisRef?.value, *args) as T
-        }
-    }
+
 
     class CtorRef(private val ctorRef: Constructor<*>) {
         operator fun invoke(vararg args: Any?): Any {
