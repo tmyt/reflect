@@ -167,6 +167,24 @@ For example:
 override val value: Any? by lazy { ctor(String::class.java)("hello alice") }
 ```
 
+## Other classes
+
+### Ref<T>
+
+#### Functions
+
+##### operator invoke(vararg arg: Any?): T
+
+Call Reflected method with arguments.
+If no method available, this method throw `NoSuchMethodException`.
+
+#### Properties
+
+##### val available: Boolean
+
+Return `true` if reflected method is available.
+
+
 ## License
 
 MIT

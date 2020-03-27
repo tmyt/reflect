@@ -32,7 +32,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'tech.onsen'
             artifactId = 'reflect'
-            version = '1.1.1'
+            version = '1.1.2'
             from components.java
 
             pom {

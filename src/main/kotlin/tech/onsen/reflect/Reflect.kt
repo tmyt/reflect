@@ -12,7 +12,7 @@ abstract class Reflect() {
         _clazz = Class.forName(className)
     }
 
-    constructor(clazz: Class<*>): this(){
+    constructor(clazz: Class<*>) : this() {
         _clazz = clazz
     }
 
@@ -24,7 +24,7 @@ abstract class Reflect() {
     protected open val value: Any? by lazy {
         try {
             type.getConstructor().newInstance()
-        }catch(e: NoSuchMethodException){
+        } catch (e: NoSuchMethodException) {
             throw IllegalStateException("target have no default constructor")
         }
     }
@@ -35,7 +35,7 @@ abstract class Reflect() {
 
             @Suppress("UNCHECKED_CAST")
             operator fun invoke(vararg args: Any?): T {
-                if(!available)throw Exception()
+                if (!available) throw NoSuchMethodException()
                 return methodRef!!.invoke(thisRef?.value, *args) as T
             }
         }
@@ -45,7 +45,7 @@ abstract class Reflect() {
         private fun getMethod(type: Class<*>, name: String): Method? {
             return try {
                 type.getMethod(name, *args)
-            }catch (e: NoSuchMethodException){
+            } catch (e: NoSuchMethodException) {
                 null
             }
         }
@@ -53,14 +53,13 @@ abstract class Reflect() {
         operator fun getValue(thisRef: Reflect, property: KProperty<*>): Ref<T> {
             if (!::method.isInitialized) {
                 method = Ref(
-                    if(isStatic) null else thisRef,
+                    if (isStatic) null else thisRef,
                     getMethod(thisRef.type, property.name)
                 )
             }
             return method
         }
     }
-
 
 
     class CtorRef(private val ctorRef: Constructor<*>) {
